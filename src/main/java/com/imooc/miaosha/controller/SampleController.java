@@ -1,16 +1,22 @@
 package com.imooc.miaosha.controller;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import com.imooc.miaosha.domain.User;
 import com.imooc.miaosha.result.CodeMsg;
 import com.imooc.miaosha.result.Result;
+import com.imooc.miaosha.service.UserService;
 
 @Controller
 @RequestMapping("/demo")
-public class DemoController {
+public class SampleController {
+	
+	@Autowired
+	UserService userService;
 	
 	@RequestMapping("/")
 	@ResponseBody
@@ -38,4 +44,11 @@ public class DemoController {
 		md.addAttribute("name", "zhouhao");
 		return "Hello";
 	}
+	
+	@RequestMapping("/db/tx")
+	@ResponseBody
+	public Result<Boolean> dbTx(Model md) {
+		return Result.sucess(userService.tx());
+	}
+
 }
