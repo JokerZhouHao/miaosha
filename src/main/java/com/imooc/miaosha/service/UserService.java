@@ -2,10 +2,12 @@ package com.imooc.miaosha.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
+import org.springframework.transaction.annotation.Transactional;import com.alibaba.druid.support.logging.Log;
 import com.imooc.miaosha.dao.UserDao;
+import com.imooc.miaosha.domain.MiaoshaUser;
 import com.imooc.miaosha.domain.User;
+import com.imooc.miaosha.result.CodeMsg;
+import com.imooc.miaosha.vo.LoginVo;
 
 @Service
 public class UserService {

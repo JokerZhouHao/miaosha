@@ -38,6 +38,12 @@ public class SampleController {
 		return Result.sucess("hello, imooc");
 	}
 	
+	@RequestMapping("/test")
+	@ResponseBody
+	public Result<String> test() {
+		return Result.sucess("test");
+	}
+	
 	@RequestMapping("/helloError")
 	@ResponseBody
 	public Result<String> helloError() {
