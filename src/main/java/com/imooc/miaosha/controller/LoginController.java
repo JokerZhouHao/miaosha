@@ -57,12 +57,8 @@ public class LoginController {
 //		}
 		
 		// 登录
-		CodeMsg cm = userService.login(loginVo);
-		if(cm.getCode() == 0) {
-			return Result.sucess(true);
-		} {
-			return Result.error(cm);
-		}
+		boolean net= userService.login(loginVo);
+		return Result.sucess(true);
 	}
 	
 }
