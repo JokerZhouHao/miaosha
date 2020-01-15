@@ -61,17 +61,17 @@ public class GoodController {
 	@RequestMapping(value="/to_list", produces="text/html")
 	@ResponseBody
 	public String toList(HttpServletRequest request, HttpServletResponse response,Model model, MiaoshaUser user) {
-		model.addAttribute("user", user);
-		// 查询商品列表
-		List<GoodsVo> goodsList = goodsService.listGoodsVo();
-		model.addAttribute("goodsList", goodsList);
-//		return "goods_list";
-		
 		// 取缓存
 		String html = redisService.get(GoodsKey.getGoodsList, "", String.class);
 		if(!StringUtils.isEmpty(html)) {
 			return html;
 		}
+		
+		model.addAttribute("user", user);
+		// 查询商品列表
+		List<GoodsVo> goodsList = goodsService.listGoodsVo();
+		model.addAttribute("goodsList", goodsList);
+//		return "goods_list";
 		
 		// 手动渲染
 		SpringWebContext ctx = new SpringWebContext(request, response, request.getServletContext(), 
@@ -88,6 +88,12 @@ public class GoodController {
 	@ResponseBody
 	public String detail(HttpServletRequest request, HttpServletResponse response,Model model, MiaoshaUser user,
 			@PathVariable("goodsId") long goodsId) {
+		// 取缓存
+		String html = redisService.get(GoodsKey.getGoodsDetail, ""+goodsId, String.class);
+		if(!StringUtils.isEmpty(html)) {
+			return html;
+		}
+		
 		model.addAttribute("user", user);
 		
 		GoodsVo goods = goodsService.getGoodsVoByGoodsId(goodsId);
@@ -114,12 +120,6 @@ public class GoodController {
 		model.addAttribute("remainSeconds", remainSeconds);
 //		return "goods_detail";
 		
-		
-		// 取缓存
-		String html = redisService.get(GoodsKey.getGoodsDetail, ""+goodsId, String.class);
-		if(!StringUtils.isEmpty(html)) {
-			return html;
-		}
 		// 手动渲染
 		SpringWebContext ctx = new SpringWebContext(request, response, request.getServletContext(), 
 				request.getLocale(), model.asMap(), applicationContext);
