@@ -1,6 +1,8 @@
 package com.imooc.miaosha.controller;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
@@ -8,6 +10,7 @@ import javax.validation.Valid;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -22,6 +25,9 @@ import com.imooc.miaosha.domain.MiaoshaOrder;
 import com.imooc.miaosha.domain.MiaoshaUser;
 import com.imooc.miaosha.domain.OrderInfo;
 import com.imooc.miaosha.domain.User;
+import com.imooc.miaosha.rabbitmq.MQSender;
+import com.imooc.miaosha.rabbitmq.MiaoshaMessage;
+import com.imooc.miaosha.redis.GoodsKey;
 import com.imooc.miaosha.redis.RedisService;
 import com.imooc.miaosha.redis.UserKey;
 import com.imooc.miaosha.result.CodeMsg;
@@ -37,7 +43,7 @@ import com.imooc.miaosha.vo.LoginVo;
 
 @Controller
 @RequestMapping("/miaosha")
-public class MiaoshaController {
+public class MiaoshaController implements InitializingBean{
 	
 	@Autowired
 	MiaoshaUserService userService;
@@ -54,7 +60,26 @@ public class MiaoshaController {
 	@Autowired
 	MiaoshaService miaoshaService;
 	
+	@Autowired
+	MQSender sender;
 	
+	private Map<Long, Boolean> localOverMap = new HashMap<Long, Boolean>();
+	
+	/**
+	 * 系统初始化
+	 */
+	@Override
+	public void afterPropertiesSet() throws Exception {
+		List<GoodsVo> goodslList = goodsService.listGoodsVo();
+		if(goodslList == null) {
+			return;
+		}
+		for(GoodsVo goods : goodslList) {
+			localOverMap.put(goods.getId(), false);
+			redisService.set(GoodsKey.getMiaoshaGoodsStock, "" + goods.getId(), goods.getStockCount());
+		}
+	}
+
 	/**
 	 * GET POST有什么区别
 	 * GET 幂等 从服务端获取数据，不会对服务端数据产生影响
@@ -63,11 +88,40 @@ public class MiaoshaController {
 	 */
 	@RequestMapping(value ="/do_miaosha", method = RequestMethod.POST)
 	@ResponseBody
-	public Result<OrderInfo> miaosha(Model model, MiaoshaUser user,
+	public Result<Integer> miaosha(Model model, MiaoshaUser user,
 			@RequestParam("goodsId") long goodsId) {
 		if(user == null) {
 			return Result.error(CodeMsg.SESSION_ERROR);
 		}
+		
+		// 内存标记，减少redis访问
+		boolean over = localOverMap.get(goodsId);
+		if(over) {
+			return Result.error(CodeMsg.MIAO_SHA_OVER);
+		}
+		
+		// 预减库存
+		Long stock = redisService.decr(GoodsKey.getMiaoshaGoodsStock, "" + goodsId);
+		if(stock < 0) {
+			localOverMap.put(goodsId, true);
+			return Result.error(CodeMsg.MIAO_SHA_OVER);
+		}
+		
+		// 是否重复秒杀
+		boolean hasOrder = miaoshaService.hasMiaoshUserGood(user.getId(), goodsId);
+		if(hasOrder) {
+			redisService.incr(GoodsKey.getMiaoshaGoodsStock, "" + goodsId);
+			return Result.error(CodeMsg.REPEATE_MIAOSHA);
+		}
+		
+		// 入队
+		MiaoshaMessage message = new MiaoshaMessage();
+		message.setUser(user);
+		message.setGoodsId(goodsId);
+		sender.sendMiaoshaMessage(message);
+		return Result.sucess(0); // 0 排队中
+		
+		/*
 		// 判断库存
 		GoodsVo goods = goodsService.getGoodsVoByGoodsId(goodsId);  // 10个商品，请求同时到达
 		int stock = goods.getStockCount();
@@ -84,6 +138,24 @@ public class MiaoshaController {
 		// 减库存 下订单 写入秒杀订单
 		OrderInfo orderInfo = miaoshaService.miaosha(user, goods);
 		return Result.sucess(orderInfo);
+		*/
+	}
+	
+	/**
+	 * orderId: 成功
+	 * -1 : 秒杀失败
+	 * 0 : 排队中
+	 */
+	@RequestMapping(value ="/result", method = RequestMethod.GET)
+	@ResponseBody
+	public Result<Long> miaoshaResult(Model model, MiaoshaUser user,
+			@RequestParam("goodsId") long goodsId) {
+		if(user == null) {
+			return Result.error(CodeMsg.SESSION_ERROR);
+		}
+		
+		long result = miaoshaService.getMiaoshaResult(user.getId(), goodsId);
+		return Result.sucess(result);
 	}
 	
 }

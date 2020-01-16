@@ -83,37 +83,37 @@ public class SampleController {
 	}
 	
 	
-	@Autowired
-	MQSender sender;
-	
-	@Autowired
-	MQReceiver receiver;
-	
-	@RequestMapping("/mq")
-	@ResponseBody
-	public Result<String> mq() {
-		sender.send("hello world");
-		return Result.sucess("mq test");
-	}
-	
-	@RequestMapping("/mq/topic")
-	@ResponseBody
-	public Result<String> topic() {
-		sender.sendTopic("hello world");
-		return Result.sucess("mq test");
-	}
-	
-	@RequestMapping("/mq/fanout")
-	@ResponseBody
-	public Result<String> fanout() {
-		sender.sendFanout("hello world");
-		return Result.sucess("mq test");
-	}
-	
-	@RequestMapping("/mq/header")
-	@ResponseBody
-	public Result<String> header() {
-		sender.sendHeader("hello world");
-		return Result.sucess("mq test");
-	}
+//	@Autowired
+//	MQSender sender;
+//	
+//	@Autowired
+//	MQReceiver receiver;
+//	
+//	@RequestMapping("/mq")
+//	@ResponseBody
+//	public Result<String> mq() {
+//		sender.send("hello world");
+//		return Result.sucess("mq test");
+//	}
+//	
+//	@RequestMapping("/mq/topic")
+//	@ResponseBody
+//	public Result<String> topic() {
+//		sender.sendTopic("hello world");
+//		return Result.sucess("mq test");
+//	}
+//	
+//	@RequestMapping("/mq/fanout")
+//	@ResponseBody
+//	public Result<String> fanout() {
+//		sender.sendFanout("hello world");
+//		return Result.sucess("mq test");
+//	}
+//	
+//	@RequestMapping("/mq/header")
+//	@ResponseBody
+//	public Result<String> header() {
+//		sender.sendHeader("hello world");
+//		return Result.sucess("mq test");
+//	}
 }
