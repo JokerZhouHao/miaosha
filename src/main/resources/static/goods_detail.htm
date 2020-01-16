@@ -60,8 +60,13 @@
         		<button class="btn btn-primary btn-block" type="submit" id="buyButton">立即秒杀</button>
         		<input type="hidden" name="goodsId"  id="goodsId" />
         	</form> -->
-       		<button class="btn btn-primary btn-block" type="button" id="buyButton" onclick="doMiaosha()">立即秒杀</button>
-       		<input type="hidden" name="goodsId"  id="goodsId" />
+        	
+       		<!-- <button class="btn btn-primary btn-block" type="button" id="buyButton" onclick="doMiaosha()">立即秒杀</button>
+       		<input type="hidden" name="goodsId"  id="goodsId" /> -->
+       		
+        	<button class="btn btn-primary" type="button" id="buyButton"onclick="getMiaoshaPath()">立即秒杀</button>
+        	<input type="hidden" name="goodsId"  id="goodsId" />
+        	
         	<!-- div class="row">
         		<div class="form-inline">
 		        	<img id="verifyCodeImg" width="80" height="32"  style="display:none" onclick="refreshVerifyCode()"/>
@@ -89,7 +94,7 @@
 </body>
 <script>
 
-function doMiaosha() {
+/* function doMiaosha() {
 	$.ajax({
 		url:"/miaosha/do_miaosha",
 		type:"POST",
@@ -108,7 +113,7 @@ function doMiaosha() {
 			layer.msg("客户端请求有误");
 		}
 	});
-}
+} */
 
 
 function getMiaoshaPath(){
@@ -119,7 +124,7 @@ function getMiaoshaPath(){
 		type:"GET",
 		data:{
 			goodsId:goodsId,
-			verifyCode:$("#verifyCode").val()
+			//verifyCode:$("#verifyCode").val()
 		},
 		success:function(data){
 			if(data.code == 0){
@@ -171,7 +176,7 @@ function getMiaoshaResult(goodsId){
 	});
 }
 
-function doMiaoSha(path){
+function doMiaosha(path){
 	$.ajax({
 		url:"/miaosha/"+path+"/do_miaosha",
 		type:"POST",

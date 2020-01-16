@@ -28,6 +28,7 @@ import com.imooc.miaosha.domain.User;
 import com.imooc.miaosha.rabbitmq.MQSender;
 import com.imooc.miaosha.rabbitmq.MiaoshaMessage;
 import com.imooc.miaosha.redis.GoodsKey;
+import com.imooc.miaosha.redis.MiaoshaKey;
 import com.imooc.miaosha.redis.RedisService;
 import com.imooc.miaosha.redis.UserKey;
 import com.imooc.miaosha.result.CodeMsg;
@@ -37,6 +38,8 @@ import com.imooc.miaosha.service.MiaoshaService;
 import com.imooc.miaosha.service.MiaoshaUserService;
 import com.imooc.miaosha.service.OrderService;
 import com.imooc.miaosha.service.UserService;
+import com.imooc.miaosha.util.MD5Util;
+import com.imooc.miaosha.util.UUIDUtil;
 import com.imooc.miaosha.util.ValidatorUtil;
 import com.imooc.miaosha.vo.GoodsVo;
 import com.imooc.miaosha.vo.LoginVo;
@@ -86,12 +89,19 @@ public class MiaoshaController implements InitializingBean{
 	 * POST  会对服务端数据产生影响
 	 * 
 	 */
-	@RequestMapping(value ="/do_miaosha", method = RequestMethod.POST)
+	@RequestMapping(value ="/{path}/do_miaosha", method = RequestMethod.POST)
 	@ResponseBody
 	public Result<Integer> miaosha(Model model, MiaoshaUser user,
-			@RequestParam("goodsId") long goodsId) {
+			@RequestParam("goodsId") long goodsId,
+			@PathVariable("path") String path) {
 		if(user == null) {
 			return Result.error(CodeMsg.SESSION_ERROR);
+		}
+		
+		// 验证path
+		boolean check = miaoshaService.checkPath(user, goodsId, path);
+		if(!check) {
+			return Result.error(CodeMsg.REQUEST_ILLEGAL);
 		}
 		
 		// 内存标记，减少redis访问
@@ -156,6 +166,18 @@ public class MiaoshaController implements InitializingBean{
 		
 		long result = miaoshaService.getMiaoshaResult(user.getId(), goodsId);
 		return Result.sucess(result);
+	}
+	
+	@RequestMapping(value ="/path", method = RequestMethod.GET)
+	@ResponseBody
+	public Result<String> getMiaoshaPath(Model model, MiaoshaUser user,
+			@RequestParam("goodsId") long goodsId) {
+		model.addAttribute("user", user);
+		if(user == null) {
+			return Result.error(CodeMsg.SESSION_ERROR);
+		}
+		String path = miaoshaService.createMiaoshaPath(user, goodsId);
+		return Result.sucess(path);
 	}
 	
 }
