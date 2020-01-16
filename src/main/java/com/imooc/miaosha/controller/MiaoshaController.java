@@ -1,9 +1,12 @@
 package com.imooc.miaosha.controller;
 
+import java.awt.image.BufferedImage;
+import java.io.OutputStream;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.imageio.ImageIO;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 
@@ -171,13 +174,43 @@ public class MiaoshaController implements InitializingBean{
 	@RequestMapping(value ="/path", method = RequestMethod.GET)
 	@ResponseBody
 	public Result<String> getMiaoshaPath(Model model, MiaoshaUser user,
+			@RequestParam("goodsId") long goodsId,
+			@RequestParam("verifyCode") int verfiyCode) {
+		model.addAttribute("user", user);
+		if(user == null) {
+			return Result.error(CodeMsg.SESSION_ERROR);
+		}
+		
+		// 验证验证码
+		boolean check = miaoshaService.checkVerifyCode(user, goodsId, verfiyCode);
+		if(!check) {
+			return Result.error(CodeMsg.REQUEST_ILLEGAL);
+		}
+		
+		String path = miaoshaService.createMiaoshaPath(user, goodsId);
+		return Result.sucess(path);
+	}
+	
+	@RequestMapping(value ="/verifyCode", method = RequestMethod.GET)
+	@ResponseBody
+	public Result<String> getMiaoshaVerifyCode(HttpServletResponse response, Model model, MiaoshaUser user,
 			@RequestParam("goodsId") long goodsId) {
 		model.addAttribute("user", user);
 		if(user == null) {
 			return Result.error(CodeMsg.SESSION_ERROR);
 		}
-		String path = miaoshaService.createMiaoshaPath(user, goodsId);
-		return Result.sucess(path);
+		
+		BufferedImage image = miaoshaService.createVerifyCode(user, goodsId);
+		try {
+			OutputStream out = response.getOutputStream();
+			ImageIO.write(image, "JPEG", out);
+			out.flush();
+			out.close();
+			return null;
+		} catch(Exception e) {
+			e.printStackTrace();
+			return Result.error(CodeMsg.MIAOSHA_FAIL);
+		}
 	}
 	
 }

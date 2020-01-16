@@ -64,16 +64,16 @@
        		<!-- <button class="btn btn-primary btn-block" type="button" id="buyButton" onclick="doMiaosha()">立即秒杀</button>
        		<input type="hidden" name="goodsId"  id="goodsId" /> -->
        		
-        	<button class="btn btn-primary" type="button" id="buyButton"onclick="getMiaoshaPath()">立即秒杀</button>
-        	<input type="hidden" name="goodsId"  id="goodsId" />
+        	<!-- <button class="btn btn-primary" type="button" id="buyButton"onclick="getMiaoshaPath()">立即秒杀</button>
+        	<input type="hidden" name="goodsId"  id="goodsId" /> -->
         	
-        	<!-- div class="row">
+        	<div class="row">
         		<div class="form-inline">
 		        	<img id="verifyCodeImg" width="80" height="32"  style="display:none" onclick="refreshVerifyCode()"/>
 		        	<input id="verifyCode"  class="form-control" style="display:none"/>
 		        	<button class="btn btn-primary" type="button" id="buyButton"onclick="getMiaoshaPath()">立即秒杀</button>
         		</div>
-        	</div> -->
+        	</div>
         	<input type="hidden" name="goodsId"  id="goodsId" />
         </td>
      </tr>
@@ -124,7 +124,7 @@ function getMiaoshaPath(){
 		type:"GET",
 		data:{
 			goodsId:goodsId,
-			//verifyCode:$("#verifyCode").val()
+			verifyCode:$("#verifyCode").val()
 		},
 		success:function(data){
 			if(data.code == 0){
@@ -181,7 +181,7 @@ function doMiaosha(path){
 		url:"/miaosha/"+path+"/do_miaosha",
 		type:"POST",
 		data:{
-			goodsId:$("#goodsId").val()
+			goodsId:$("#goodsId").val(),
 		},
 		success:function(data){
 			if(data.code == 0){
