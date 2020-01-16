@@ -7,6 +7,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.imooc.miaosha.domain.User;
+import com.imooc.miaosha.rabbitmq.MQReceiver;
+import com.imooc.miaosha.rabbitmq.MQSender;
 import com.imooc.miaosha.redis.RedisService;
 import com.imooc.miaosha.redis.UserKey;
 import com.imooc.miaosha.result.CodeMsg;
@@ -78,5 +80,40 @@ public class SampleController {
 		redisService.set(UserKey.getById, String.valueOf(user.getId()), user);
 		User v1 = redisService.get(UserKey.getById, "1", User.class);
 		return Result.sucess(v1);
+	}
+	
+	
+	@Autowired
+	MQSender sender;
+	
+	@Autowired
+	MQReceiver receiver;
+	
+	@RequestMapping("/mq")
+	@ResponseBody
+	public Result<String> mq() {
+		sender.send("hello world");
+		return Result.sucess("mq test");
+	}
+	
+	@RequestMapping("/mq/topic")
+	@ResponseBody
+	public Result<String> topic() {
+		sender.sendTopic("hello world");
+		return Result.sucess("mq test");
+	}
+	
+	@RequestMapping("/mq/fanout")
+	@ResponseBody
+	public Result<String> fanout() {
+		sender.sendFanout("hello world");
+		return Result.sucess("mq test");
+	}
+	
+	@RequestMapping("/mq/header")
+	@ResponseBody
+	public Result<String> header() {
+		sender.sendHeader("hello world");
+		return Result.sucess("mq test");
 	}
 }
