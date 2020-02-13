@@ -13,6 +13,7 @@ import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.method.support.ModelAndViewContainer;
 
+import com.imooc.miaosha.access.UserContext;
 import com.imooc.miaosha.domain.MiaoshaUser;
 import com.imooc.miaosha.service.MiaoshaUserService;
 
@@ -31,28 +32,6 @@ public class UserArgumentResolver implements HandlerMethodArgumentResolver {
 	@Override
 	public Object resolveArgument(MethodParameter parameter, ModelAndViewContainer mavContainer,
 			NativeWebRequest webRequest, WebDataBinderFactory binderFactory) throws Exception {
-		HttpServletRequest request = webRequest.getNativeRequest(HttpServletRequest.class);
-		HttpServletResponse response = webRequest.getNativeResponse(HttpServletResponse.class);
-		
-		String paramToken = request.getParameter(MiaoshaUserService.COOKIE_NAME_TOKEN);
-		String cookieToken = getCookieValue(request, MiaoshaUserService.COOKIE_NAME_TOKEN);
-		if(StringUtils.isEmpty(cookieToken) && StringUtils.isEmpty(paramToken)) {
-			return null;
-		}
-		String token = StringUtils.isEmpty(paramToken)?cookieToken:paramToken;
-		return userService.getByToken(response,token);
+		return UserContext.getUser();
 	}
-
-	private String getCookieValue(HttpServletRequest request, String cookieNameToken) {
-		Cookie[] cookies = request.getCookies();
-		if(cookies != null) {
-			for(Cookie cookie : cookies) {
-				if(cookie.getName().equals(cookieNameToken)) {
-					return cookie.getValue();
-				}
-			}
-		}
-		return null;
-	}
-	
 }
