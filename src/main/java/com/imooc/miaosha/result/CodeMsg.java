@@ -29,6 +29,8 @@ public class CodeMsg {
 	public static CodeMsg REPEATE_MIAOSHA = new CodeMsg(500501, "不能重复秒杀");
 	public static CodeMsg MIAOSHA_FAIL = new CodeMsg(500502, "秒杀失败");
 	
+	// 用户模块 5006XX
+	public static CodeMsg USER_HAS_EXIST = new CodeMsg(500600, "用户已存在");
 	
 	private CodeMsg(int i, String string) {
 		this.code = i;

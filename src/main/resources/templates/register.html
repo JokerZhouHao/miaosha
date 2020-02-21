@@ -1,7 +1,7 @@
 <!DOCTYPE HTML>
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
-    <title>登录</title>
+    <title>注册</title>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
     
     <!-- jquery -->
@@ -22,9 +22,9 @@
 </head>
 <body>
 
-<form name="loginForm" id="loginForm" method="post"  style="width:50%; margin:0 auto">
+<form name="registerForm" id="registerForm" method="post"  style="width:50%; margin:0 auto">
 
-	<h2 style="text-align:center; margin-bottom: 20px">用户登录</h2>
+	<h2 style="text-align:center; margin-bottom: 20px">用户注册</h2>
 	
 	<div class="form-group">
        	<div class="row">
@@ -46,13 +46,22 @@
       		</div>
 	</div>
 	
+	<div class="form-group">
+     		<div class="row">
+		        <label class="form-label col-md-4">请确认密码</label>
+		        <div class="col-md-5">
+		        	<input id="password_affirm" name="password_affirm" class="form-control" type="password"  placeholder="确认密码" required="true" minlength="6" maxlength="16" />
+	       		</div>
+      		</div>
+	</div>
+	
 	<div class="row">
-		     	<div class="col-md-5">
+		     	<div class="col-md-10">
 					<button class="btn btn-primary btn-block"  onclick="register()">注册</button>
 	       	 	</div>
-	       	 	<div class="col-md-5">
+	       	 	<!-- <div class="col-md-5">
 					<button class="btn btn-primary btn-block" type="submit" onclick="login()">登录</button>
-	       	 	</div>
+	       	 	</div> -->
 		<!-- <div class="col-md-5">
 			<p th:text="'网站访问次数为:'+${count}" ></p>
 		</div> -->
@@ -61,37 +70,38 @@
 </form>
 </body>
 <script>
-
-var mobile = getQueryString("mobile");
-if(mobile != null) $("#mobile").val(mobile);
-
-function getQueryString(name) {
-	var reg = new RegExp("(^|&amp;)" + name + "=([^&amp;]*)(&amp;|$)", "i");
-	var r = window.location.search.substr(1).match(reg);
-	if (r != null) return unescape(r[2]); return null;
-}
-
 function register() {
-    window.location.href='/user/register';
+    $("#registerForm").validate({
+        submitHandler:function(form){
+        	doRegister();
+        }    
+    });
 }
 
-function login(){
+/* function login(){
 	$("#loginForm").validate({
         submitHandler:function(form){
              doLogin();
         }    
     });
-}
-function doLogin(){
+} */
+
+function doRegister(){
 	g_showLoading();
 	
 	var inputPass = $("#password").val();
+	var inputPassAffirm = $("#password_affirm").val();
+	if(inputPass != inputPassAffirm) {
+		layer.msg("两次输入密码不一致");
+		return;
+	}
+	
 	var salt = g_passsword_salt;
 	var str = ""+salt.charAt(0)+salt.charAt(2) + inputPass +salt.charAt(5) + salt.charAt(4);
 	var password = md5(str);
 	
 	$.ajax({
-		url: "/login/do_login",
+		url: "/user/do_register",
 	    type: "POST",
 	    data:{
 	    	mobile:$("#mobile").val(),
@@ -103,7 +113,7 @@ function doLogin(){
 	    	
 	    	if(data.code == 0){
 	    		layer.msg("成功");
-	    		window.location.href="/goods/to_list";
+	    		window.location.href="/login/to_login?mobile=" + $("#mobile").val();
 	    	} else{
 	    		layer.msg(data.msg);
 	    	}	

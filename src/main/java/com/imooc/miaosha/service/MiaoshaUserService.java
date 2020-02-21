@@ -38,7 +38,7 @@ public class MiaoshaUserService {
 		// 取数据库
 		user = miaoshaUserDao.getById(id);
 		if(user != null) {
-			redisService.set(MiaoshaUserKey.getById, "" + id, MiaoshaUser.class);
+			redisService.set(MiaoshaUserKey.getById, "" + id, user);
 		}
 		return user;
 	}
@@ -107,6 +107,8 @@ public class MiaoshaUserService {
 		cookie.setPath("/");
 		response.addCookie(cookie);
 	}
-	
-	
+
+	public int addUser(MiaoshaUser user) {
+		return miaoshaUserDao.insert(user);
+	}
 }

@@ -1,5 +1,6 @@
 package com.imooc.miaosha.dao;
 
+import org.apache.ibatis.annotations.Insert;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Select;
 import org.apache.ibatis.annotations.Update;
@@ -14,4 +15,8 @@ public interface MiaoshaUserDao {
 	
 	@Update("update miaosha_user set password=#{password} where id=#{id}")
 	public void update(MiaoshaUser toBeUpdate);
+	
+	@Insert("insert into miaosha_user(id, password, salt, register_date, nickname)"
+			+ " values(#{id}, #{password}, #{salt}, #{registerDate}, 'test')")
+	public int insert(MiaoshaUser user);
 }

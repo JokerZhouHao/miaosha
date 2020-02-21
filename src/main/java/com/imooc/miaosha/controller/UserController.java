@@ -1,5 +1,6 @@
 package com.imooc.miaosha.controller;
 
+import java.util.Date;
 import java.util.List;
 
 import javax.servlet.http.HttpServletResponse;
@@ -26,6 +27,7 @@ import com.imooc.miaosha.result.Result;
 import com.imooc.miaosha.service.GoodsService;
 import com.imooc.miaosha.service.MiaoshaUserService;
 import com.imooc.miaosha.service.UserService;
+import com.imooc.miaosha.util.MD5Util;
 import com.imooc.miaosha.util.ValidatorUtil;
 import com.imooc.miaosha.vo.GoodsVo;
 import com.imooc.miaosha.vo.LoginVo;
@@ -45,5 +47,26 @@ public class UserController {
 	@ResponseBody
 	public Result<MiaoshaUser> info(Model model, MiaoshaUser user) {
 		return Result.sucess(user);
+	}
+	
+	@RequestMapping("/register")
+	public String do_register() {
+		return "register";
+	}
+	
+	@RequestMapping("/do_register")
+	@ResponseBody
+	public Result<String> register(@Valid LoginVo loginVo) {
+		MiaoshaUser user = userService.getById(Long.parseLong(loginVo.getMobile()));
+		if(user != null) {
+			return Result.error(CodeMsg.USER_HAS_EXIST);
+		}
+		user = new MiaoshaUser();
+		user.setId(Long.parseLong(loginVo.getMobile()));
+		user.setSalt(MD5Util.salt);
+		user.setPassword(MD5Util.formPassToDBPass(loginVo.getPassword(), user.getSalt()));
+		user.setRegisterDate(new Date());
+		if(userService.addUser(user) == 1)	return Result.sucess("注册成功");
+		else return Result.error(CodeMsg.SERVER_ERROR);
 	}
 }

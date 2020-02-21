@@ -11,6 +11,8 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.servlet.ModelAndView;
+import org.springframework.web.servlet.view.RedirectView;
 
 import com.imooc.miaosha.access.UserContext;
 import com.imooc.miaosha.domain.MiaoshaUser;
@@ -25,10 +27,10 @@ import com.imooc.miaosha.util.ValidatorUtil;
 import com.imooc.miaosha.vo.LoginVo;
 
 @Controller
-@RequestMapping("/login")
-public class LoginController {
+@RequestMapping("/")
+public class IndexController {
 	
-	private static Logger log = LoggerFactory.getLogger(LoginController.class);
+	private static Logger log = LoggerFactory.getLogger(IndexController.class);
 	
 	@Autowired
 	MiaoshaUserService userService;
@@ -36,18 +38,12 @@ public class LoginController {
 	@Autowired
 	RedisService redisService;
 	
-	@RequestMapping("/to_login")
-	public String toLogin() {
-		return "login";
+	@RequestMapping("/")
+	public String index(HttpServletResponse response) {
+//		ModelAndView mv = new ModelAndView();
+//		mv.setView(new RedirectView("/login/to_login", true, false));
+//		return mv;
+//		return "redirect:/login/to_login";
+		return "forward:/login/to_login";
 	}
-	
-	@RequestMapping("/do_login")
-	@ResponseBody
-	public Result<String> doLogin(HttpServletResponse response,  @Valid LoginVo loginVo) {
-		log.info(loginVo.toString());
-		// 登录
-		String token = userService.login(response, loginVo);
-		return Result.sucess(token);
-	}
-	
 }
